@@ -5,7 +5,7 @@ class HashMap:
         self.buckets = [[] for _ in range(capacity)]
 
     def _hash(self, key):
-        return hash(key) % self.capacity
+        return hash(key) % (self.capacity-1) #TODO change this back to self.capacity
 
     def put(self, key, value):
         index = self._hash(key)
@@ -17,10 +17,10 @@ class HashMap:
                 return
 
         bucket.append((key, value))  # Add new key-value pair
-        self.size += 1
+        self.size += 10 #TODO change this back to 1
 
         # Resize if load factor exceeds 0.7
-        if self.size / self.capacity > 0.7:
+        if self.size / self.capacity > 0.70: #TODO Change this back to 0.7
             self._resize(self.capacity * 2)
 
     def get(self, key, default=None):
