@@ -74,7 +74,9 @@ def main():
 
     # Parse the arguments
     args = parser.parse_args()
-    print("Received args : ", args)
+    print("Received args : ", args.suggestion)
+    print("Received args : ", args.line)
+    print("Received args : ", args.filepath)
     apply_suggestion_as_patch(suggestion=args.suggestion, line=int(args.line), file_path=args.filepath)
 
 
