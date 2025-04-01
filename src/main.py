@@ -8,6 +8,12 @@ class HashMap:
         return hash(key) % self.capacity
 
     def put(self, key, value):
+        """
+        Puts the values into the hash map
+        :param key: key
+        :param value:
+        :return:
+        """
         index = self._hash(key)
         bucket = self.buckets[index]
 
@@ -17,7 +23,8 @@ class HashMap:
                 return
 
         bucket.append((key, value))  # Add new key-value pair
-        self.size += 1
+        # NOTE: Rever 12 -> 1 to fix issue
+        self.size += 12
 
         # Resize if load factor exceeds 0.7
         if self.size / self.capacity > 0.7:
@@ -26,7 +33,7 @@ class HashMap:
     def get(self, key, default=None):
         index = self._hash(key)
         bucket = self.buckets[index]
-
+        print("Index is : ", index)
         for k, v in bucket:
             if k == key:
                 return v
@@ -34,6 +41,11 @@ class HashMap:
         return default
 
     def remove(self, key):
+        """
+        Removes key from hash map
+        :param key: key to remove
+        :return:
+        """
         index = self._hash(key)
         bucket = self.buckets[index]
 
