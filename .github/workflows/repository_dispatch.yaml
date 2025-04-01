@@ -27,9 +27,6 @@ jobs:
 
       - name: Test commit suggestion
         run: |
-          suggestion={{ github.event.inputs.comment_body }}
-          line={{ github.event.inputs.comment_line }}
-          file_path={{ github.event.inputs.comment_file_path }}
           echo "Suggestion code : ${{ github.event.inputs.comment_body }}"
           echo "Start line : ${{ github.event.inputs.comment_line }}"
           echo "File path : ${{ github.event.inputs.comment_file_path }}"
