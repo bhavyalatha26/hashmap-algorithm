@@ -69,13 +69,13 @@ def main():
 
     # Add named arguments (options)
     parser.add_argument("-s", "--suggestion", type=str, help="Code for the commit suggestion")
-    parser.add_argument("-l", "--line", type=int, help="Start line of the commit suggestion")
+    parser.add_argument("-l", "--line", type=str, help="Start line of the commit suggestion")
     parser.add_argument("-f", "--filepath", type=str, help="Path of the file containing the suggestion")
 
     # Parse the arguments
     args = parser.parse_args()
     print("Received args : ", args)
-    apply_suggestion_as_patch(suggestion=args.suggestion, line=args.line, file_path=args.filepath)
+    apply_suggestion_as_patch(suggestion=args.suggestion, line=int(args.line), file_path=args.filepath)
 
 
 if __name__ == "__main__":
