@@ -1,0 +1,18 @@
+name: Handle PR Comment Webhook
+
+on:
+  repository_dispatch:
+    types: [pr_comment_added]
+
+jobs:
+  process-comment:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Extract Comment Details
+        run: |
+          echo "Comment ID: ${{ github.event.client_payload.comment.id }}"
+          echo "Comment Body: ${{ github.event.client_payload.comment.body }}"
+          echo "User: ${{ github.event.client_payload.comment.user.login }}"
