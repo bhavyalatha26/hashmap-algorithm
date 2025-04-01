@@ -10,7 +10,7 @@ on:
       comment_line:
         description: 'Start line number of the comment'
         required: true
-        type: integer
+        type: string
       comment_file_path:
         description: 'File path of the file in which commit suggestion was made'
         required: true
