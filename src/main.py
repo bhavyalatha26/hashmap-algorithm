@@ -5,6 +5,11 @@ class HashMap:
         self.buckets = [[] for _ in range(capacity)]
 
     def _hash(self, key):
+        """
+        Returns hash value of the key
+        :param key: Key
+        :return: hash of the key
+        """
         return hash(key) % self.capacity
 
     def put(self, key, value):
@@ -37,6 +42,11 @@ class HashMap:
         return default
 
     def remove(self, key):
+        """
+        Removes the key from hashmap
+        :param key: key to be removed
+        :return:
+        """
         index = self._hash(key)
         bucket = self.buckets[index]
 
