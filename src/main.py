@@ -68,8 +68,10 @@ class HashMap:
 
         for bucket in self.buckets:
             for key, value in bucket:
+                # Take index and divide buy capacity
                 index = hash(key) % new_capacity
                 new_buckets[index].append((key, value))
+                # Increment the size by 1
                 self.size += 1
 
         self.buckets = new_buckets
