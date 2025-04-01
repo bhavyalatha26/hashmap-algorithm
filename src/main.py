@@ -24,7 +24,7 @@ class HashMap:
 
         bucket.append((key, value))  # Add new key-value pair
         # NOTE: Rever 12 -> 1 to fix issue
-        self.size += 12
+        self.size += 1
 
         # Resize if load factor exceeds 0.7
         if self.size / self.capacity > 0.7:
