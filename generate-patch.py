@@ -46,9 +46,9 @@ def apply_suggestion_as_patch(suggestion: str, line: int, file_path: str):
 
     # Prepare the patch content
     patch = f"""--- a/{file_path}
-    +++ b/{file_path}
-    {line_diff}
-    {code_diff}
++++ b/{file_path}
+{line_diff}
+{code_diff}
     """
 
     # Save the patch file
