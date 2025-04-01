@@ -1,3 +1,4 @@
+import json
 import re
 import sys
 import argparse
@@ -6,14 +7,8 @@ import argparse
 def apply_suggestion_as_patch(suggestion: str, line: int, file_path: str):
     patch_file = "suggestion.patch"
 
-    # Extract the suggested code changes from commit suggestion (comment)
-    pattern = r"```suggestion\r?\n(.*?)\r?\n?```"
-    match = re.search(pattern, suggestion, re.DOTALL)
-    if match:
-        suggested_lines = str(match.group(1)).split("\n")
-    else:
-        print("No suggestion block found.")
-        sys.exit(0)
+    decoded_suggestion = json.loads(suggestion)
+    suggested_lines = decoded_suggestion.split("\n")
 
     # Load the actual code in the file path (before changes)
     with open(file_path, "r") as f:
