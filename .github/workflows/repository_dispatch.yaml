@@ -2,6 +2,19 @@ name: Handle PR Comment Webhook
 
 on:
   workflow_dispatch:  # Allows manual workflow level trigger
+    inputs:
+      comment_body:
+        description: 'Body of the commit suggestion'
+        required: true
+        type: string
+      comment_line:
+        description: 'Start line number of the comment'
+        required: true
+        type: string
+      comment_file_path:
+        description: 'File path of the file in which commit suggestion was made'
+        required: true
+        type: string
   repository_dispatch: # Allows repository level trigger
     types: [pr_comment_added]
 
@@ -14,6 +27,6 @@ jobs:
 
       - name: Extract Comment Details
         run: |
-          echo "Comment ID: ${{ github.event.client_payload.comment.id }}"
-          echo "Comment Body: ${{ github.event.client_payload.comment.body }}"
-          echo "User: ${{ github.event.client_payload.comment.user.login }}"
+          echo "Suggestion code : ${{ github.event.inputs.comment_body }}"
+          echo "Start line : ${{ github.event.inputs.comment_line }}"
+          echo "File path : ${{ github.event.inputs.comment_file_path }}"
