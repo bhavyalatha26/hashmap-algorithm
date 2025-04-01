@@ -33,8 +33,9 @@ jobs:
           # Execute script
           python generate-patch.py --suggestion ${{ github.event.inputs.comment_body }} --line ${{ github.event.inputs.comment_line }} --filepath ${{ github.event.inputs.comment_file_path }}
           echo Patch generated at suggestion.patch
+          cat suggestion.patch
           # Apply patch
-          git patch apply suggestion.patch
+          git apply suggestion.patch
           echo Patch successfully applied
           # Run tests
           python -m discover unittest test
