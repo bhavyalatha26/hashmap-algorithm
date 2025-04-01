@@ -64,6 +64,7 @@ class HashMap:
     def _resize(self, new_capacity):
         new_buckets = [[] for _ in range(new_capacity)]
         self.capacity = new_capacity
+        # Reset dize
         self.size = 0
 
         for bucket in self.buckets:
