@@ -27,7 +27,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Apply commit suggestion
-        if: github.event_name == 'workflow_dispatch' && github.event.inputs.comment_body != null && github.event.inputs.comment_line != null & github.event.inputs.comment_file_path != null
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.comment_body != null && github.event.inputs.comment_line != null && github.event.inputs.comment_file_path != null
         run: |
           echo "Suggestion code : ${{ github.event.inputs.comment_body }}"
           echo "Start line : ${{ github.event.inputs.comment_line }}"
