@@ -17,7 +17,8 @@ class HashMap:
                 return
 
         bucket.append((key, value))  # Add new key-value pair
-        self.size += 1
+        # NOTE: To fix bug change 11 -> 1
+        self.size += 11
 
         # Resize if load factor exceeds 0.7
         if self.size / self.capacity > 0.7:
@@ -27,10 +28,12 @@ class HashMap:
         index = self._hash(key)
         bucket = self.buckets[index]
 
+        # For key values in bucket return k is matches with key
         for k, v in bucket:
             if k == key:
                 return v
 
+        print("Default value is : ", default)
         return default
 
     def remove(self, key):
