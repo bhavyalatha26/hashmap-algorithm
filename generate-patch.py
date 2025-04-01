@@ -5,8 +5,8 @@ import requests
 
 repo_full_name = "bhavyalatha26/hashmap-algorithm"
 patch_file = "suggestion.patch"
-comment_id = "2016754812"
-git_token = "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"
+comment_id = ""
+git_token = ""
 
 # Fetch the comment details from github pr
 response = requests.get(f"https://api.github.com/repos/{repo_full_name}/pulls/comments/{comment_id}", headers={
