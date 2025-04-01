@@ -1,3 +1,4 @@
+import base64
 import json
 import re
 import sys
@@ -7,8 +8,8 @@ import argparse
 def apply_suggestion_as_patch(suggestion: str, line: int, file_path: str):
     patch_file = "suggestion.patch"
 
-    decoded_suggestion = json.loads(suggestion).get("code")
-    suggested_lines = decoded_suggestion.split("\n")
+    decoded_bytes = base64.b64decode(suggestion.encode('utf-8'))
+    suggested_lines = decoded_bytes.decode('utf-8').split("\n")
 
     # Load the actual code in the file path (before changes)
     with open(file_path, "r") as f:
