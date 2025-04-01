@@ -1,7 +1,8 @@
 name: Handle PR Comment Webhook
 
 on:
-  repository_dispatch:
+  workflow_dispatch:  # Allows manual workflow level trigger
+  repository_dispatch: # Allows repository level trigger
     types: [pr_comment_added]
 
 jobs:
