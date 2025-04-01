@@ -18,8 +18,6 @@ on:
         description: 'File path of the file in which commit suggestion was made'
         required: true
         type: string
-  repository_dispatch: # Allows repository level trigger
-    types: [pr_comment_added]
 
 jobs:
   process-comment:
