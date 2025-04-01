@@ -7,7 +7,7 @@ import argparse
 def apply_suggestion_as_patch(suggestion: str, line: int, file_path: str):
     patch_file = "suggestion.patch"
 
-    decoded_suggestion = json.loads(suggestion)
+    decoded_suggestion = json.loads(suggestion).get("code")
     suggested_lines = decoded_suggestion.split("\n")
 
     # Load the actual code in the file path (before changes)
