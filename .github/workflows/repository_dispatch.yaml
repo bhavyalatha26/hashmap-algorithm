@@ -27,11 +27,14 @@ jobs:
 
       - name: Test commit suggestion
         run: |
-          echo "Suggestion code : ${{ github.event.inputs.comment_body }}"
-          echo "Start line : ${{ github.event.inputs.comment_line }}"
-          echo "File path : ${{ github.event.inputs.comment_file_path }}"
+          suggestion={{ github.event.inputs.comment_body }}
+          line={{ github.event.inputs.comment_line }}
+          file_path={{ github.event.inputs.comment_file_path }}
+          echo "Suggestion code : $suggestion"
+          echo "Start line : $line"
+          echo "File path : $file_path"
           # Execute script
-          python generate-patch.py --suggestion github.event.inputs.comment_body --line github.event.inputs.comment_line --filepath github.event.inputs.comment_file_path
+          python generate-patch.py --suggestion $suggestion --line $line --filepath $file_path
           echo Patch generated at suggestion.patch
           # Apply patch
           git patch apply suggestion.patch
