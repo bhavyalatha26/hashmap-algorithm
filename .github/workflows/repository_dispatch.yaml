@@ -10,7 +10,7 @@ on:
       comment_line:
         description: 'Start line number of the comment'
         required: true
-        type: string
+        type: integer
       comment_file_path:
         description: 'File path of the file in which commit suggestion was made'
         required: true
@@ -25,8 +25,16 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Extract Comment Details
+      - name: Test commit suggestion
         run: |
           echo "Suggestion code : ${{ github.event.inputs.comment_body }}"
           echo "Start line : ${{ github.event.inputs.comment_line }}"
           echo "File path : ${{ github.event.inputs.comment_file_path }}"
+          # Execute script
+          python generate-patch.py --suggestion github.event.inputs.comment_body --line github.event.inputs.comment_line --filepath github.event.inputs.comment_file_path --verbose
+          echo Patch generated at suggestion.patch
+          # Apply patch
+          git patch apply suggestion.patch
+          echo Patch successfully applied
+          # Run tests
+          python -m discover unittest test

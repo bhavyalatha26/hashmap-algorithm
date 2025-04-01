@@ -1,77 +1,82 @@
 import re
 import sys
+import argparse
 
-import requests
 
-repo_full_name = "bhavyalatha26/hashmap-algorithm"
-patch_file = "suggestion.patch"
-comment_id = ""
-git_token = ""
+def apply_suggestion_as_patch(suggestion: str, line: int, file_path: str):
+    patch_file = "suggestion.patch"
 
-# Fetch the comment details from github pr
-response = requests.get(f"https://api.github.com/repos/{repo_full_name}/pulls/comments/{comment_id}", headers={
-    "Authorization": f"Bearer {git_token}",
-    "Accept": "application/vnd.github.v3+json"
-})
-comment_json = response.json()
+    # Extract the suggested code changes from commit suggestion (comment)
+    pattern = r"```suggestion\r?\n(.*?)\r?\n?```"
+    match = re.search(pattern, suggestion, re.DOTALL)
+    if match:
+        suggested_lines = str(match.group(1)).split("\n")
+    else:
+        print("No suggestion block found.")
+        sys.exit(0)
 
-# Extract the suggested code changes from commit suggestion (comment)
-suggestion: str = comment_json.get("body", "")
-suggested_lines: list[str] = []
-pattern = r"```suggestion\r?\n(.*?)\r?\n?```"
-match = re.search(pattern, suggestion, re.DOTALL)
-if match:
-    suggested_lines = str(match.group(1)).split("\n")
-else:
-    print("No suggestion block found.")
-    sys.exit(0)
+    # Load the actual code in the file path (before changes)
+    with open(file_path, "r") as f:
+        existing_file_content = [line.rstrip('\n') for line in f.readlines()]
+        f.close()
 
-# Extract the change start line
-line = comment_json.get("line", "")
-# Extract the change file path
-file_path = comment_json.get('path', '')
+    # Collect the code diff from the suggested code changes
+    code_diff = []
 
-# Load the actual code in the file path (before changes)
-with open(file_path, "r") as f:
-    existing_file_content = [line.rstrip('\n') for line in f.readlines()]
-    f.close()
+    # Prepend the previous 3 lines of code
+    prev_lines = existing_file_content[line - 4:line - 1]
+    prev_lines = list(map(lambda x: " " + x, prev_lines))
+    code_diff.extend(prev_lines)
 
-# Collect the code diff from the suggested code changes
-code_diff = []
+    # Add code diff to remove the start line
+    remove_line = "-" + existing_file_content[line - 1]  # get code at this line
+    code_diff.append(remove_line)
 
-# Prepend the previous 3 lines of code
-prev_lines = existing_file_content[line-4:line-1]
-prev_lines = list(map(lambda x:" " + x, prev_lines))
-code_diff.extend(prev_lines)
+    # Add code diff to add the new suggested lines of code
+    add_lines = list(map(lambda x: ("+" + x).rstrip(), suggested_lines))
+    code_diff.extend(add_lines)
 
-# Add code diff to remove the start line
-remove_line = "-" + existing_file_content[line - 1]  # get code at this line
-code_diff.append(remove_line)
+    # Append the next 3 lines of code
+    next_lines = existing_file_content[line:line + 3]
+    next_lines = list(map(lambda x: " " + x, next_lines))
+    code_diff.extend(next_lines)
 
-# Add code diff to add the new suggested lines of code
-add_lines = list(map(lambda x:("+" + x).rstrip(), suggested_lines))
-code_diff.extend(add_lines)
+    # Prepare the line diff (@@ -x,y +x,z @@)
+    changed_lines_count = len(prev_lines) + len(next_lines)
+    line_diff = f"@@ -{line - len(prev_lines)},{changed_lines_count + 1} +{line - len(prev_lines)},{changed_lines_count + len(suggested_lines)} @@"
 
-# Append the next 3 lines of code
-next_lines = existing_file_content[line:line+3]
-next_lines = list(map(lambda x:" " + x, next_lines))
-code_diff.extend(next_lines)
+    # Convert the lines of code into single code diff string
+    code_diff = "\n".join(code_diff)
 
-# Prepare the line diff (@@ -x,y +x,z @@)
-changed_lines_count = len(prev_lines) + len(next_lines)
-line_diff = f"@@ -{line-len(prev_lines)},{changed_lines_count + 1} +{line-len(prev_lines)},{changed_lines_count + len(suggested_lines)} @@"
+    # Prepare the patch content
+    patch = f"""--- a/{file_path}
+    +++ b/{file_path}
+    {line_diff}
+    {code_diff}
+    """
 
-# Convert the lines of code into single code diff string
-code_diff = "\n".join(code_diff)
+    # Save the patch file
+    with open(patch_file, "w") as f:
+        f.write(patch)
+        f.close()
 
-# Prepare the patch content
-patch = f"""--- a/{file_path}
-+++ b/{file_path}
-{line_diff}
-{code_diff}
-"""
 
-# Save the patch file
-with open(patch_file, "w") as f:
-    f.write(patch)
-    f.close()
+def main():
+    """This is the main function of the script that uses named arguments."""
+
+    # Create an ArgumentParser object
+    parser = argparse.ArgumentParser(description="A sample script that uses named arguments.")
+
+    # Add named arguments (options)
+    parser.add_argument("-s", "--suggestion", type=str, help="Code for the commit suggestion")
+    parser.add_argument("-l", "--line", type=int, help="Start line of the commit suggestion")
+    parser.add_argument("-f", "--filepath", type=str, help="Path of the file containing the suggestion")
+
+    # Parse the arguments
+    args = parser.parse_args()
+    print("Received args : ", args)
+    apply_suggestion_as_patch(suggestion=args.suggestion, line=args.line, file_path=args.filepath)
+
+
+if __name__ == "__main__":
+    main()
