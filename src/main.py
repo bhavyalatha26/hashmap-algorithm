@@ -61,39 +61,3 @@ class HashMap:
                 self.size += 1
 
         self.buckets = new_buckets
-
-
-# Example usage:
-if __name__ == "__main__":
-    my_map = HashMap()
-    my_map.put("apple", 1)
-    my_map.put("banana", 2)
-    my_map.put("cherry", 3)
-
-    print(my_map.get("apple"))  # Output: 1
-    print(my_map.get("grape"))  # Output: None
-    print(my_map.get("grape", 0))  # Output: 0
-
-    print(len(my_map))  # Output: 3
-    print("banana" in my_map)  # Output: True
-
-    my_map.remove("banana")
-    print(len(my_map))  # Output: 2
-    print("banana" in my_map)  # Output: False
-
-    my_map.put("date", 4)
-    my_map.put("elderberry", 5)
-    my_map.put("fig", 6)
-    my_map.put("guava", 7)
-    my_map.put("honeydew", 8)
-    my_map.put("kiwi", 9)
-    my_map.put("lemon", 10)
-    my_map.put("mango", 11)
-    my_map.put("nectarine", 12)
-    my_map.put("orange", 13)
-    my_map.put("papaya", 14)
-    my_map.put("quince", 15)
-    my_map.put("raspberry", 16)
-    my_map.put("strawberry", 17)
-    my_map.put("tangerine", 18)  # triggers resize
-    print(my_map.capacity)  # prints 32 after resize
