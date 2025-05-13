@@ -1,15 +1,21 @@
 import base64
+import codecs
 import json
+import os
 import re
 import sys
 import argparse
+from itertools import groupby
+from operator import itemgetter
 
 
-def apply_suggestion_as_patch(suggestion: str, line: int, file_path: str):
-    patch_file = "suggestion.patch"
+def apply_suggestion_as_patch(suggestion: str, line: int, file_path: str, append: bool = False):
+    patch_folder = "patches"
 
-    decoded_bytes = base64.b64decode(suggestion.encode('utf-8'))
-    suggested_lines = decoded_bytes.decode('utf-8').split("\n")
+    print(suggestion)
+    # decoded_bytes = base64.b64decode(suggestion.encode('utf-8'))
+    suggested_lines = suggestion.split("\n")
+    suggested_lines = list(map(lambda x: str(x).strip("\r"), suggested_lines))
 
     # Load the actual code in the file path (before changes)
     with open(file_path, "r") as f:
@@ -45,14 +51,17 @@ def apply_suggestion_as_patch(suggestion: str, line: int, file_path: str):
     code_diff = "\n".join(code_diff)
 
     # Prepare the patch content
-    patch = f"""--- a/{file_path}
-+++ b/{file_path}
-{line_diff}
-{code_diff}
-    """
-
+    if append:
+        patch = "\n".join([line_diff, code_diff])
+    else:
+        patch = "\n".join([f"--- a/{file_path}", f"+++ b/{file_path}", line_diff, code_diff])
     # Save the patch file
-    with open(patch_file, "w") as f:
+    mode = "a" if append else "w"
+    folder = os.getcwd() + f"/{patch_folder}"
+    os.makedirs(folder, exist_ok=True)
+    with open(f"{folder}/{file_path.replace('/','_').replace('.','_')}.patch", mode) as f:
+        if mode == "a":
+            f.write("\n")
         f.write(patch)
         f.close()
 
@@ -61,19 +70,33 @@ def main():
     """This is the main function of the script that uses named arguments."""
 
     # Create an ArgumentParser object
-    parser = argparse.ArgumentParser(description="A sample script that uses named arguments.")
+    parser = argparse.ArgumentParser(description="A git patch generator script to generate patch files for given github code suggestion comments")
 
     # Add named arguments (options)
-    parser.add_argument("-s", "--suggestion", type=str, help="Code for the commit suggestion")
-    parser.add_argument("-l", "--line", type=str, help="Start line of the commit suggestion")
-    parser.add_argument("-f", "--filepath", type=str, help="Path of the file containing the suggestion")
+    parser.add_argument("-c", "--comments", type=str, help="Base 64 encoded list of github comments")
 
     # Parse the arguments
     args = parser.parse_args()
-    print("Received args : ", args.suggestion)
-    print("Received args : ", args.line)
-    print("Received args : ", args.filepath)
-    apply_suggestion_as_patch(suggestion=args.suggestion, line=int(args.line), file_path=args.filepath)
+    decoded_bytes = base64.b64decode(args.comments.encode('utf-8'))
+    decoded_comments = json.loads(decoded_bytes.decode('utf-8'))
+    print("Received comments : ", decoded_comments)
+
+    # Group the data by 'path'
+    grouped_data = {}
+    for key, group in groupby(decoded_comments, key=itemgetter('path')):
+        grouped_data[key] = list(group)
+
+    # Sort each group by 'line'
+    for path, comments in grouped_data.items():
+        sorted_comments = sorted(comments, key=itemgetter('line'))
+        append = False
+        print(f"Generating patch for file - {path}")
+        for comment in sorted_comments:
+            apply_suggestion_as_patch(
+                suggestion=comment.get("body", ""), line=int(comment.get("line", "0")), file_path=path,
+                append=append
+            )
+            append = True
 
 
 if __name__ == "__main__":
