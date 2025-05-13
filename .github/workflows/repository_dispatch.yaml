@@ -4,7 +4,9 @@ on:
   pull_request:
     branches:
       - main
-  workflow_dispatch:  # Allows manual workflow level trigger
+
+  # [CLOUDAEYE] ADD WORKFLOW DISPATCH: To allow manual trigger of this workflow
+  workflow_dispatch:
     inputs:
       commit_suggestions:
         description: 'Encoded list of commit suggestions'
@@ -18,14 +20,13 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Apply commit suggestion
+      # [CLOUDAEYE] ADD STEP: To locally apply the commit suggestions as git patches and then run tests
+      - name: Apply and validate commit suggestion
         if: github.event_name == 'workflow_dispatch' && github.event.inputs.commit_suggestions != null
         run: |
           echo "Triggering patch file generation for received commit suggestions"
-          # Execute script
+          # Execute generate patch python script
           python generate-patch.py --comments ${{ github.event.inputs.commit_suggestions }}
-          # List all generated patch files
-          ls patches
           # Apply all patch files
           for patch in patches/*.patch; do git apply "$patch" && echo "Patch applied successfully - $patch"; done
 
