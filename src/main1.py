@@ -29,7 +29,7 @@ class HashMap1:
 
         for k, v in bucket:
             # todo make it == to fix test failures
-            if k != key:
+            if k == key:
                 return v
 
         return default

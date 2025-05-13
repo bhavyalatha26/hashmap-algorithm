@@ -2,7 +2,8 @@ class HashMap:
     def __init__(self, capacity=16):
         self.capacity = capacity
         # NOTE: Revert it to 0 to make it work again
-        self.size = 110
+        self.size = 0
+        print("This is a right suggestion")
         self.buckets = [[] for _ in range(capacity)]
 
     def _hash(self, key):
