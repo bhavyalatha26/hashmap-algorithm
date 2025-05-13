@@ -8,10 +8,14 @@ import argparse
 from itertools import groupby
 from operator import itemgetter
 
+PATCH_FOLDER = os.getcwd() + "/patches"
+
+
+def generate_patch_file_name(path_to_file: str) -> str:
+    return path_to_file.replace('/', '_').replace('.', '_')
+
 
 def apply_suggestion_as_patch(suggestion: str, line: int, file_path: str, append: bool = False):
-    patch_folder = "patches"
-
     print(suggestion)
     # decoded_bytes = base64.b64decode(suggestion.encode('utf-8'))
     suggested_lines = suggestion.split("\n")
@@ -57,9 +61,7 @@ def apply_suggestion_as_patch(suggestion: str, line: int, file_path: str, append
         patch = "\n".join([f"--- a/{file_path}", f"+++ b/{file_path}", line_diff, code_diff])
     # Save the patch file
     mode = "a" if append else "w"
-    folder = os.getcwd() + f"/{patch_folder}"
-    os.makedirs(folder, exist_ok=True)
-    with open(f"{folder}/{file_path.replace('/','_').replace('.','_')}.patch", mode) as f:
+    with open(f"{PATCH_FOLDER}/{generate_patch_file_name(path_to_file=file_path)}.patch", mode) as f:
         if mode == "a":
             f.write("\n")
         f.write(patch)
@@ -70,7 +72,8 @@ def main():
     """This is the main function of the script that uses named arguments."""
 
     # Create an ArgumentParser object
-    parser = argparse.ArgumentParser(description="A git patch generator script to generate patch files for given github code suggestion comments")
+    parser = argparse.ArgumentParser(
+        description="A git patch generator script to generate patch files for given github code suggestion comments")
 
     # Add named arguments (options)
     parser.add_argument("-c", "--comments", type=str, help="Base 64 encoded list of github comments")
@@ -86,6 +89,8 @@ def main():
     for key, group in groupby(decoded_comments, key=itemgetter('path')):
         grouped_data[key] = list(group)
 
+    os.makedirs(PATCH_FOLDER, exist_ok=True)
+
     # Sort each group by 'line'
     for path, comments in grouped_data.items():
         sorted_comments = sorted(comments, key=itemgetter('line'))
@@ -97,6 +102,9 @@ def main():
                 append=append
             )
             append = True
+        with open(f"{PATCH_FOLDER}/{generate_patch_file_name(path_to_file=path)}.patch", 'a') as f:
+            f.write('\n')
+            f.close()
 
 
 if __name__ == "__main__":
