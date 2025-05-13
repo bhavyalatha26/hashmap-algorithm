@@ -106,11 +106,12 @@ def main():
         # Generate the patch file for all suggestions of that file
         append = False
         for comment in sorted_comments:
-            generate_patch_file(
+            patch_file_path = generate_patch_file(
                 suggestion=comment.get("body", ""), line=int(comment.get("line", "0")), file_path=path,
                 append=append
             )
             append = True
+            print(f"Code diff {'appended' if append else 'added'} to patch file - {patch_file_path}")
 
 
 if __name__ == "__main__":
