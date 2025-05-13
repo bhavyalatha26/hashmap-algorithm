@@ -1,10 +1,7 @@
+import argparse
 import base64
-import codecs
 import json
 import os
-import re
-import sys
-import argparse
 from itertools import groupby
 from operator import itemgetter
 
@@ -15,9 +12,15 @@ def generate_patch_file_name(path_to_file: str) -> str:
     return path_to_file.replace('/', '_').replace('.', '_')
 
 
-def apply_suggestion_as_patch(suggestion: str, line: int, file_path: str, append: bool = False):
-    print(suggestion)
-    # decoded_bytes = base64.b64decode(suggestion.encode('utf-8'))
+def generate_patch_file(suggestion: str, line: int, file_path: str, append: bool = False) -> str:
+    """
+    Generates the patch file based on the code suggestions provided
+    :param suggestion: The actual code suggestion
+    :param line: Start line of the change
+    :param file_path: The path to which these changes need to be applied
+    :param append: Determines whether the content need to written or appended to the file
+    :return: Path of the patch file
+    """
     suggested_lines = suggestion.split("\n")
     suggested_lines = list(map(lambda x: str(x).strip("\r"), suggested_lines))
 
@@ -59,17 +62,19 @@ def apply_suggestion_as_patch(suggestion: str, line: int, file_path: str, append
         patch = "\n".join([line_diff, code_diff])
     else:
         patch = "\n".join([f"--- a/{file_path}", f"+++ b/{file_path}", line_diff, code_diff])
+
     # Save the patch file
-    mode = "a" if append else "w"
-    with open(f"{PATCH_FOLDER}/{generate_patch_file_name(path_to_file=file_path)}.patch", mode) as f:
-        if mode == "a":
-            f.write("\n")
+    patch_file = f"{PATCH_FOLDER}/{generate_patch_file_name(path_to_file=file_path)}.patch"
+    with open(patch_file, "a") as f:
         f.write(patch)
+        f.write("\n")
         f.close()
+
+    return patch_file
 
 
 def main():
-    """This is the main function of the script that uses named arguments."""
+    """This is the main function of the script."""
 
     # Create an ArgumentParser object
     parser = argparse.ArgumentParser(
@@ -80,32 +85,36 @@ def main():
 
     # Parse the arguments
     args = parser.parse_args()
+
+    # Decode the received commit suggestions (list of dict)
     decoded_bytes = base64.b64decode(args.comments.encode('utf-8'))
     decoded_comments = json.loads(decoded_bytes.decode('utf-8'))
-    print("Received comments : ", decoded_comments)
 
-    # Group the data by 'path'
+    # Group the suggestions by the file names
     grouped_data = {}
     for key, group in groupby(decoded_comments, key=itemgetter('path')):
         grouped_data[key] = list(group)
 
+    # Create the patch parent folder (all patch files will be saved to this)
     os.makedirs(PATCH_FOLDER, exist_ok=True)
 
-    # Sort each group by 'line'
+    # For each file and the list of commit suggestions for it
     for path, comments in grouped_data.items():
+        # Sort the suggestion by line number first
         sorted_comments = sorted(comments, key=itemgetter('line'))
-        append = False
         print(f"Generating patch for file - {path}")
+        # Generate the patch file for all suggestions of that file
+        append = False
         for comment in sorted_comments:
-            apply_suggestion_as_patch(
+            generate_patch_file(
                 suggestion=comment.get("body", ""), line=int(comment.get("line", "0")), file_path=path,
                 append=append
             )
             append = True
-        with open(f"{PATCH_FOLDER}/{generate_patch_file_name(path_to_file=path)}.patch", 'a') as f:
-            f.write('\n')
-            f.close()
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as e:
+        raise Exception(f"Error while generating patch scripts : \n{e}")
