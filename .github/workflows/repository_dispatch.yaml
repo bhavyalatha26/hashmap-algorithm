@@ -19,7 +19,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Apply commit suggestion
-        if: github.event_name == 'workflow_dispatch' && github.event.inputs.comment_body != null && github.event.inputs.comment_line != null && github.event.inputs.comment_file_path != null
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.commit_suggestions != null
         run: |
           echo "Triggering patch file generation for received commit suggestions"
           # Execute script
