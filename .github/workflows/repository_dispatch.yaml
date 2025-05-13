@@ -6,16 +6,8 @@ on:
       - main
   workflow_dispatch:  # Allows manual workflow level trigger
     inputs:
-      comment_body:
-        description: 'Body of the commit suggestion'
-        required: true
-        type: string
-      comment_line:
-        description: 'Start line number of the comment'
-        required: true
-        type: string
-      comment_file_path:
-        description: 'File path of the file in which commit suggestion was made'
+      commit_suggestions:
+        description: 'Encoded list of commit suggestions'
         required: true
         type: string
 
@@ -29,16 +21,13 @@ jobs:
       - name: Apply commit suggestion
         if: github.event_name == 'workflow_dispatch' && github.event.inputs.comment_body != null && github.event.inputs.comment_line != null && github.event.inputs.comment_file_path != null
         run: |
-          echo "Suggestion code : ${{ github.event.inputs.comment_body }}"
-          echo "Start line : ${{ github.event.inputs.comment_line }}"
-          echo "File path : ${{ github.event.inputs.comment_file_path }}"
+          echo "Triggering patch file generation for received commit suggestions"
           # Execute script
-          python generate-patch.py --suggestion ${{ github.event.inputs.comment_body }} --line ${{ github.event.inputs.comment_line }} --filepath ${{ github.event.inputs.comment_file_path }}
-          echo Patch generated at suggestion.patch
-          cat suggestion.patch
-          # Apply patch
-          git apply suggestion.patch
-          echo Patch successfully applied
+          python generate-patch.py --comments ${{ github.event.inputs.commit_suggestions }}
+          # List all generated patch files
+          ls patches
+          # Apply all patch files
+          for patch in patches/*.patch; do git apply "$patch" && echo "Patch applied successfully - $patch"; done
 
       - name: Run tests
         run: |
